@@ -1,0 +1,21 @@
+# Build output
+build/
+out/
+bin/
+obj/
+*.o
+*.obj
+*.exe
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editor/OS
+.vscode/
+.DS_Store
+
+# Secrets
+.env

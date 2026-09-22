@@ -11,10 +11,10 @@ int main() {
         std::string expression;
         std::string x_text;
 
-        std::cout << "Expression using x (example: x^3 + 2*x): ";
+        std::cout << "Artahajtutjun ogtagordzelov x (orinak: x^3 + 2*x): ";
         std::getline(std::cin, expression);
 
-        std::cout << "Value of x: ";
+        std::cout << "arjeq@  x: ";
         std::getline(std::cin, x_text);
 
         const double x = std::stod(x_text);

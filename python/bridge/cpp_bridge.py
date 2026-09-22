@@ -54,7 +54,7 @@ def solve_with_cpp_engine(problem: str) -> dict:
 
 
 def main():
-    problem = input("Մուտքագրիր խնդիրը. ").strip()
+    problem = input("Մուտքագրիր խնդիրը. ( prabelov ) ").strip()
     if not problem:
         print("Ոչինչ չմուտքագրվեց.")
         sys.exit(1)
@@ -70,3 +70,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    

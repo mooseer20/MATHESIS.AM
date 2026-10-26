@@ -26,6 +26,7 @@ ENGINE_PATH = "engine/build/math_engine"
 
 def solve_with_cpp_engine(problem: str) -> dict:
     """
+    
     Ուղարկում է `problem`-ը C++ engine-ին և վերադարձնում պատասխանը dict-ի
     տեսքով: Եթե ինչ-որ բան սխալ է գնում, բարձրացնում է RuntimeError:
     """
@@ -43,15 +44,16 @@ def solve_with_cpp_engine(problem: str) -> dict:
         )
     except subprocess.TimeoutExpired:
         raise RuntimeError("Engine-ը չափազանց երկար ժամանակ խնդրեց (>10 վրկ).")
+    try:
+        data = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        data = None
 
     if result.returncode != 0:
-        raise RuntimeError(f"Engine-ն ավարտվեց error-ով.\n{result.stderr}")
+        message = data.get("error") if data else result.stderr
+        raise RuntimeError(f"Engine-ն ավարտվեց error-ով. {message}")
 
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return {"raw_output": result.stdout.strip()}
-
+    return data if data is not None else {"raw_output": result.stdout.strip()}
 
 def main():
     problem = input("Մուտքագրիր խնդիրը. ( prabelov ) ").strip()

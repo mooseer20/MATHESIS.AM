@@ -10,6 +10,3 @@
 - `docs/` — architecture & notes
 - `scripts/` — dev automation  (later)
  
-
- git add engine/src/mmain.cpp engine/include/parser.h engine/tests/test_parser.cpp
-git commit -m "fix: reject trailing input and fix derivative precision, add tests"

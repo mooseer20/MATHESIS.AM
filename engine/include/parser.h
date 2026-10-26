@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <unordered_map>
+#include <map>
+#include <iomanip>
 #include <cctype>
 #include <cmath>
 #include <cstddef>
@@ -18,6 +21,7 @@
 // -----------------------------------------------------------------------------
 
 enum class TokenType {
+    Identifier,
     Number,
     Plus,
     Minus,
@@ -32,7 +36,10 @@ enum class TokenType {
 struct Token {
     TokenType type;
     double value = 0.0;
+    std::string text;
 };
+
+using Variables = std::unordered_map<std::string, double>;
 
 inline std::vector<Token> tokenize(const std::string& expr) {
     std::vector<Token> tokens;
@@ -43,6 +50,31 @@ inline std::vector<Token> tokenize(const std::string& expr) {
 
         if (std::isspace(static_cast<unsigned char>(c))) {
             ++i;
+            continue;
+        }
+
+        // Variable names: x, velocity, _temp, number_2
+        if (std::isalpha(static_cast<unsigned char>(c)) || c == '_') {
+            const std::size_t start = i;
+            ++i;
+
+            while (i < expr.size()) {
+                const char current = expr[i];
+
+                if (std::isalnum(static_cast<unsigned char>(current)) ||
+                    current == '_') {
+                    ++i;
+                } else {
+                    break;
+                }
+            }
+
+            tokens.push_back({
+                TokenType::Identifier,
+                0.0,
+                expr.substr(start, i - start)
+            });
+
             continue;
         }
 
@@ -66,7 +98,11 @@ inline std::vector<Token> tokenize(const std::string& expr) {
             const std::string number_text = expr.substr(start, i - start);
 
             try {
-                tokens.push_back({TokenType::Number, std::stod(number_text)});
+                tokens.push_back({
+                    TokenType::Number,
+                    std::stod(number_text),
+                    ""
+                });
             } catch (const std::exception&) {
                 throw std::runtime_error("invalid number: " + number_text);
             }
@@ -104,13 +140,14 @@ inline std::vector<Token> tokenize(const std::string& expr) {
 //   term   := unary (('*' | '/') unary)*
 //   unary  := ('+' | '-') unary | power
 //   power  := factor [ '^' unary ]
-//   factor := number | '(' expr ')'
+//   factor := number | identifier | '(' expr ')'
 // -----------------------------------------------------------------------------
 
 class Parser {
 public:
-    explicit Parser(std::vector<Token> tokens)
-        : tokens_(std::move(tokens)) {}
+    explicit Parser(std::vector<Token> tokens, Variables variables = {})
+        : tokens_(std::move(tokens)),
+          variables_(std::move(variables)) {}
 
     double parse() {
         const double result = parseExpression();
@@ -162,6 +199,16 @@ private:
             return token.value;
         }
 
+        if (token.type == TokenType::Identifier) {
+            const auto variable = variables_.find(token.text);
+
+            if (variable == variables_.end()) {
+                throw std::runtime_error("unknown variable: " + token.text);
+            }
+
+            return variable->second;
+        }
+
         if (token.type == TokenType::LParen) {
             const double result = parseExpression();
 
@@ -176,24 +223,23 @@ private:
         }
 
         throw std::runtime_error(
-            "սպասվում էր թիվ կամ '(' (expected number or '(')"
+            "սպասվում էր թիվ, փոփոխական կամ '(' "
+            "(expected number, variable, or '(')"
         );
     }
 
-     double parsePower() {
+    double parsePower() {
         const double base = parseFactor();
-    
+
         if (peek().type == TokenType::Caret) {
-            advance();  // required: consume '^'
-    
+            advance();
+
             const double exponent = parseUnary();
             return std::pow(base, exponent);
         }
-    
+
         return base;
     }
-
-  
 
     double parseUnary() {
         if (peek().type == TokenType::Plus) {
@@ -235,42 +281,38 @@ private:
 
     std::vector<Token> tokens_;
     std::size_t pos_ = 0;
+    Variables variables_;
 };
 
 // -----------------------------------------------------------------------------
 // Evaluation and numeric derivative
 // -----------------------------------------------------------------------------
 
-inline double evaluate(const std::string& expression) {
-    Parser parser(tokenize(expression));
+inline double evaluate(const std::string& expression,
+                       Variables variables = {}) {
+    Parser parser(tokenize(expression), std::move(variables));
     return parser.parse();
 }
 
 inline double evaluate_at(const std::string& expr,
-                 const std::string& var,
-                       double value) {
-    std::ostringstream value_stream;
-    value_stream << '(' << value << ')';
-
-    std::string substituted = expr;
-    std::size_t pos = 0;
-
-    while ((pos = substituted.find(var, pos)) != std::string::npos) {
-        substituted.replace(pos, var.size(), value_stream.str());
-        pos += value_stream.str().size();
+                          const std::string& var,
+                          double value) {
+    if (var.empty()) {
+        throw std::runtime_error("variable name cannot be empty");
     }
 
-    return evaluate(substituted);
+    return evaluate(expr, {{var, value}});
 }
 
 inline double derivative_at(const std::string& expr,
                             const std::string& var,
                             double x,
                             double h = 1e-5) {
-    const double f_plus = evaluate_at(expr, var, x + h);
-    const double f_minus = evaluate_at(expr, var, x - h);
+    const double f_plus = evaluate(expr, {{var, x + h}});
+    const double f_minus = evaluate(expr, {{var, x - h}});
 
     return (f_plus - f_minus) / (2.0 * h);
 }
 
-
+// aftter hardening engine with the variables it becomes:
+// factor := number | identifier | '(' expr ')'

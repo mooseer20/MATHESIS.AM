@@ -9,4 +9,3 @@
 - `python/` — Python bridge & tooling
 - `docs/` — architecture & notes
 - `scripts/` — dev automation  (later)
- 

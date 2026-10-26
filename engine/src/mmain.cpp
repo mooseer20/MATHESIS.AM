@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
     try {
         std::vector<Token> tokens = tokenize(problem);
         Parser parser(std::move(tokens));
-        double result = parser.parseExpression();
+        double result = parser.parse();
         std::cout << "{\"input\": \"" << problem << "\", \"result\": " << result << "}" << std::endl;
     } catch (const std::exception& e) {
         std::cout << "{\"input\": \"" << problem << "\", \"error\": \"" << e.what() << "\"}" << std::endl;

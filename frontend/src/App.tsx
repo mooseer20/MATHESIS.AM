@@ -1,8 +1,26 @@
-export default function App() {
-  return (
-    <>
-      <h1>Mathesis jan jan jan</h1>
-      <p>Solve any math problem. See every step.</p>
-    </>
-  );
+import Topbar from "./components/TopBAr";
+import Sidebar from "./components/Sidebar";
+
+import ProblemCard  from "./components/Problemcard";
+
+import VizPanel from "./components/Vizpanel";
+import Metrics from "./components/Metrics";
+
+import StepsPanel from "./components/StepsPanel";
+
+
+export default function App (){
+
+  return ( 
+    <div className = "app">
+    <Topbar />
+    <Sidebar />
+    <main className="main">
+      <ProblemCard />
+      <VizPanel />
+      <Metrics />
+    </main>
+    <StepsPanel />
+    </div>
+  ); 
 }

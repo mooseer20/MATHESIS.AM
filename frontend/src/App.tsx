@@ -1,4 +1,4 @@
-import Topbar from "./components/TopBAr";
+import Topbar from "./components/Topbar";
 import Sidebar from "./components/Sidebar";
 
 import ProblemCard  from "./components/Problemcard";
@@ -24,3 +24,4 @@ export default function App (){
     </div>
   ); 
 }
+

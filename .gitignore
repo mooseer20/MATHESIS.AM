@@ -20,3 +20,4 @@ venv/
 
 # Secrets
 .env
+.idea/
